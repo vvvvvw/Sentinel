@@ -58,7 +58,7 @@ public abstract class Entry implements AutoCloseable {
      * {@link Node} of the specific origin, Usually the origin is the Service Consumer.
      */
     private Node originNode;
-    private Throwable error;
+    private Throwable error; //如果被sentinel拦截，抛出blocking异常，就是记录在这个字段中，注意：业务异常不会记录在这个地方
     protected ResourceWrapper resourceWrapper;
 
     public Entry(ResourceWrapper resourceWrapper) {

@@ -43,16 +43,19 @@ public class DefaultNode extends StatisticNode {
     /**
      * The resource associated with the node.
      */
+    //资源标识
     private ResourceWrapper id;
 
     /**
      * The list of all child nodes.
      */
+    //子节点
     private volatile Set<Node> childList = new HashSet<>();
 
     /**
      * Associated cluster node.
      */
+    //用来做数据统计的 ClusterNode
     private ClusterNode clusterNode;
 
     public DefaultNode(ResourceWrapper id, ClusterNode clusterNode) {

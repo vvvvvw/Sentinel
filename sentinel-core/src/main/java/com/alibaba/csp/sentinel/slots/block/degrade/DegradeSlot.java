@@ -15,6 +15,7 @@
  */
 package com.alibaba.csp.sentinel.slots.block.degrade;
 
+import com.alibaba.csp.sentinel.Tracer;
 import com.alibaba.csp.sentinel.context.Context;
 import com.alibaba.csp.sentinel.node.DefaultNode;
 import com.alibaba.csp.sentinel.slotchain.AbstractLinkedProcessorSlot;

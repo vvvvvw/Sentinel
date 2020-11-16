@@ -34,7 +34,7 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.occupy.OccupiableBucketLe
  */
 public class ArrayMetric implements Metric {
 
-    private final LeapArray<MetricBucket> data;
+    private final LeapArray<MetricBucket> data; //内部是一个 LeapArray
 
     public ArrayMetric(int sampleCount, int intervalInMs) {
         this.data = new OccupiableBucketLeapArray(sampleCount, intervalInMs);

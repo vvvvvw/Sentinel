@@ -116,33 +116,44 @@ public class CtSph implements Sph {
 
     private Entry entryWithPriority(ResourceWrapper resourceWrapper, int count, boolean prioritized, Object... args)
         throws BlockException {
+        // 从 ThreadLocal 中获取 Context 实例
         Context context = ContextUtil.getContext();
         if (context instanceof NullContext) {
+            // 如果是 NullContext，那么说明 context name 超过了 2000 个，参见 ContextUtil#trueEnter
+            // 这个时候，Sentinel 不再接受处理新的 context 配置，也就是不做这些新的接口的统计、限流熔断等
             // The {@link NullContext} indicates that the amount of context has exceeded the threshold,
             // so here init the entry only. No rule checking will be done.
             return new CtEntry(resourceWrapper, null, context);
         }
 
+        // 我们前面说了，如果我们不显式调用 ContextUtil#enter，这里会进入到默认的 context 中
         if (context == null) {
             // Using default context.
             context = MyContextUtil.myEnter(Constants.CONTEXT_DEFAULT_NAME, "", resourceWrapper.getType());
         }
 
+        // Sentinel 的全局开关，Sentinel 提供了接口让用户可以在 dashboard 开启/关闭，如果关闭，返回一个dummy对象
         // Global switch is close, no rule checking will do.
         if (!Constants.ON) {
             return new CtEntry(resourceWrapper, null, context);
         }
 
+        // 设计模式中的责任链模式。
+        // 获取调用链，入参是 resource，前面我们说过资源的唯一标识是 resource name
+        // 当 资源数量超过6000的时候，返回null（Sentinel 不处理这个请求，这么做主要是为了 Sentinel 的性能考虑）
         ProcessorSlot<Object> chain = lookProcessChain(resourceWrapper);
 
         /*
          * Means amount of resources (slot chain) exceeds {@link Constants.MAX_SLOT_CHAIN_SIZE},
          * so no rule checking will be done.
          */
+        //如果 资源数量超过6000的时候，返回null，返回一个 dnmmy对象
         if (chain == null) {
             return new CtEntry(resourceWrapper, null, context);
         }
 
+        // 执行这个责任链。如果抛出 BlockException，说明链上的某一环拒绝了该请求，
+        // 把这个异常往上层业务层抛，业务层处理 BlockException 应该进入到熔断降级逻辑中
         Entry e = new CtEntry(resourceWrapper, chain, context);
         try {
             chain.entry(context, resourceWrapper, null, count, prioritized, args);
@@ -191,6 +202,7 @@ public class CtSph implements Sph {
      * @param resourceWrapper target resource
      * @return {@link ProcessorSlotChain} of the resource
      */
+    //获取调用链，当 资源数量超过6000的时候，返回null（Sentinel 不处理这个请求，这么做主要是为了 Sentinel 的性能考虑）
     ProcessorSlot<Object> lookProcessChain(ResourceWrapper resourceWrapper) {
         ProcessorSlotChain chain = chainMap.get(resourceWrapper);
         if (chain == null) {

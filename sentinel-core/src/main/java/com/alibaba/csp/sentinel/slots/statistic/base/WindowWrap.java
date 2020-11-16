@@ -22,6 +22,7 @@ package com.alibaba.csp.sentinel.slots.statistic.base;
  * @author jialiang.linjl
  * @author Eric Zhao
  */
+//滑动窗口的每个bucket实例
 public class WindowWrap<T> {
 
     /**

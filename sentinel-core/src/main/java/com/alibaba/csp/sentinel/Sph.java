@@ -140,6 +140,7 @@ public interface Sph {
      * @return entry get
      * @throws BlockException if the block criteria is met
      */
+    ////name：资源名称，type：资源的类型，EntryType.IN 代表这个是入口流量；EntryType.OUT 代表出口流量
     Entry entry(String name, EntryType type, int count, Object... args) throws BlockException;
 
     /**

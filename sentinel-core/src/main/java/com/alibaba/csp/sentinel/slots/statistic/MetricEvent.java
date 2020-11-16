@@ -23,13 +23,13 @@ public enum MetricEvent {
     /**
      * Normal pass.
      */
-    PASS,
+    PASS, //没有被sentinel拦截的请求
     /**
      * Normal block.
      */
-    BLOCK,
-    EXCEPTION,
-    SUCCESS,
+    BLOCK, //被sentinel拦截的请求
+    EXCEPTION,//调用tracer.trace（）记录的异常请求（业务异常同样也统计在 SUCCESS中）
+    SUCCESS, //所有没有被sentinel拦截的请求（包括正常响应和业务异常请求）
     RT,
 
     /**

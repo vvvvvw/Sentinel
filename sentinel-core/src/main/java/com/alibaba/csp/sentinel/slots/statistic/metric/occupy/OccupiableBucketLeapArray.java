@@ -51,7 +51,7 @@ public class OccupiableBucketLeapArray extends LeapArray<MetricBucket> {
     @Override
     protected WindowWrap<MetricBucket> resetWindowTo(WindowWrap<MetricBucket> w, long time) {
         // Update the start time and reset value.
-        w.resetTo(time);
+        w.resetTo(time); //更新时间戳
         MetricBucket borrowBucket = borrowArray.getWindowValue(time);
         if (borrowBucket != null) {
             w.value().reset();

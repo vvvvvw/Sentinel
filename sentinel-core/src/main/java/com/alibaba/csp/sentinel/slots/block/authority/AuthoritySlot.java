@@ -30,6 +30,7 @@ import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
  * @author leyou
  * @author Eric Zhao
  */
+//根据 origin 做黑白名单的控制
 public class AuthoritySlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
     @Override

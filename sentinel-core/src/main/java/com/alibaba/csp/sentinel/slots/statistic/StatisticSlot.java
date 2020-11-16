@@ -17,6 +17,7 @@ package com.alibaba.csp.sentinel.slots.statistic;
 
 import java.util.Collection;
 
+import com.alibaba.csp.sentinel.Tracer;
 import com.alibaba.csp.sentinel.slotchain.ProcessorSlotEntryCallback;
 import com.alibaba.csp.sentinel.slotchain.ProcessorSlotExitCallback;
 import com.alibaba.csp.sentinel.slots.block.flow.PriorityWaitException;
@@ -46,12 +47,15 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
  * @author jialiang.linjl
  * @author Eric Zhao
  */
+//数据统计
 public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
     @Override
     public void entry(Context context, ResourceWrapper resourceWrapper, DefaultNode node, int count,
                       boolean prioritized, Object... args) throws Throwable {
         try {
+            //先 fire 出去，等后面的节点处理完毕以后，它再进行统计数据
+            //原因：后面的节点是做控制的，执行的时候可能是正常通过的，也可能是抛出 BlockException 异常的
             // Do some checking.
             fireEntry(context, resourceWrapper, node, count, prioritized, args);
 
@@ -132,7 +136,7 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
     public void exit(Context context, ResourceWrapper resourceWrapper, int count, Object... args) {
         DefaultNode node = (DefaultNode)context.getCurNode();
 
-        if (context.getCurEntry().getError() == null) {
+        if (context.getCurEntry().getError() == null) { //如果没有被sentinel拦截
             // Calculate response time (max RT is TIME_DROP_VALVE).
             long rt = TimeUtil.currentTimeMillis() - context.getCurEntry().getCreateTime();
             if (rt > Constants.TIME_DROP_VALVE) {

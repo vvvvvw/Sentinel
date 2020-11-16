@@ -109,7 +109,13 @@ public class ContextUtil {
      *               invoker/consumer separately.
      * @return The invocation context of the current thread
      */
-    public static Context enter(String name, String origin) {
+    /**
+     *
+     * @param name
+     * @param origin 调用方标识 origin,有两个作用，一是用于黑白名单的授权控制，二是可以用来统计诸如从应用 application-a 发起的对当前应用 interfaceXxx() 接口的调用
+     * @return
+     */
+    public static Context enter(String name, String origin) { //当没有调用enter的时候，context名字就是用CONTEXT_DEFAULT_NAME
         if (Constants.CONTEXT_DEFAULT_NAME.equals(name)) {
             throw new ContextNameDefineException(
                 "The " + Constants.CONTEXT_DEFAULT_NAME + " can't be permit to defined!");
@@ -123,7 +129,7 @@ public class ContextUtil {
             Map<String, DefaultNode> localCacheNameMap = contextNameNodeMap;
             DefaultNode node = localCacheNameMap.get(name);
             if (node == null) {
-                if (localCacheNameMap.size() > Constants.MAX_CONTEXT_NAME_SIZE) {
+                if (localCacheNameMap.size() > Constants.MAX_CONTEXT_NAME_SIZE) { //如果context的数量已经超过限制，则返回空context对象
                     setNullContext();
                     return NULL_CONTEXT;
                 } else {
@@ -135,6 +141,7 @@ public class ContextUtil {
                                 setNullContext();
                                 return NULL_CONTEXT;
                             } else {
+                                //添加EntranceNode节点
                                 node = new EntranceNode(new StringResourceWrapper(name, EntryType.IN), null);
                                 // Add entrance node.
                                 Constants.ROOT.addChild(node);

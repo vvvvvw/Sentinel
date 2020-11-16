@@ -44,6 +44,7 @@ import com.alibaba.csp.sentinel.slotchain.StringResourceWrapper;
  *
  * @author jialiang.linjl
  */
+//在不同的上下文中，一个资源id会生成多个DefaultNode，但是只会有一个ClusterNode
 public class ClusterBuilderSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
     /**
@@ -64,10 +65,12 @@ public class ClusterBuilderSlot extends AbstractLinkedProcessorSlot<DefaultNode>
      * at the very beginning while concurrent map will hold the lock all the time.
      * </p>
      */
+    //key：资源 value：ClusterNode
     private static volatile Map<ResourceWrapper, ClusterNode> clusterNodeMap = new HashMap<>();
 
     private static final Object lock = new Object();
 
+    //本资源对应的 ClusterNode（调用链实例的维度是 资源，每个资源都有一个不同的调用链实例）
     private volatile ClusterNode clusterNode = null;
 
     @Override
@@ -93,6 +96,7 @@ public class ClusterBuilderSlot extends AbstractLinkedProcessorSlot<DefaultNode>
          * if context origin is set, we should get or create a new {@link Node} of
          * the specific origin.
          */
+        //处理 origin 不是默认值的情况
         if (!"".equals(context.getOrigin())) {
             Node originNode = node.getClusterNode().getOrCreateOriginNode(context.getOrigin());
             context.getCurEntry().setOriginNode(originNode);

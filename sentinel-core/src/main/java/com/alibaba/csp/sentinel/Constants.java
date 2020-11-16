@@ -52,6 +52,7 @@ public final class Constants {
     /**
      * Global statistic node for inbound traffic. Usually used for {@link SystemRule} checking.
      */
+    // 全局统计节点（统计入口流量）
     public final static ClusterNode ENTRY_NODE = new ClusterNode();
 
     /**

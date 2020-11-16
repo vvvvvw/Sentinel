@@ -122,13 +122,16 @@ import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
  * @see EntranceNode
  * @see ContextUtil
  */
+// defaultnode构建，在不同的上下文中，一个资源id会生成多个DefaultNode，但是只会有一个ClusterNode
 public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
 
     /**
      * {@link DefaultNode}s of the same resource in different context.
      */
+    // key：上下文 name，value 是 DefaultNode 实例，
     private volatile Map<String, DefaultNode> map = new HashMap<String, DefaultNode>(10);
 
+    /*context: 就是context对应的EntranceNode*/
     @Override
     public void entry(Context context, ResourceWrapper resourceWrapper, Object obj, int count, boolean prioritized, Object... args)
         throws Throwable {
@@ -150,6 +153,7 @@ public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
          * The answer is all {@link DefaultNode}s with same resource name share one
          * {@link ClusterNode}. See {@link ClusterBuilderSlot} for detail.
          */
+        //这块代码主要就是要处理：不同的 context name，同一个 resource name 的情况
         DefaultNode node = map.get(context.getName());
         if (node == null) {
             synchronized (this) {

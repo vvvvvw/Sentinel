@@ -23,6 +23,7 @@ import com.alibaba.csp.sentinel.EntryType;
  * @author qinan.qn
  * @author jialiang.linjl
  */
+//资源标识，SphU#entry（name） 中的name参数
 public class StringResourceWrapper extends ResourceWrapper {
 
     public StringResourceWrapper(String name, EntryType type) {

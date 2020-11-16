@@ -35,6 +35,9 @@ public class SampleCountProperty {
      * take effect.
      * </p>
      * Node that this value must be divisor of 1000.
+     * 每秒拆分的bucket数量，此变量决定qps统计的灵敏度
+     * 使用updateSampleCount(int)来修改本值，如果直接修改本值，修改不会生效。
+     * 注意本值一定要能被1000整除
      */
     public static volatile int SAMPLE_COUNT = 2;
 

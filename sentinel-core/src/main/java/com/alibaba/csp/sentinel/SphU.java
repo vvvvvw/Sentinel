@@ -82,6 +82,7 @@ public class SphU {
      * @param name the unique name of the protected resource
      * @throws BlockException if the block criteria is met, eg. when any rule's threshold is exceeded.
      */
+    //name：资源标识
     public static Entry entry(String name) throws BlockException {
         return Env.sph.entry(name, EntryType.OUT, 1, OBJECTS0);
     }

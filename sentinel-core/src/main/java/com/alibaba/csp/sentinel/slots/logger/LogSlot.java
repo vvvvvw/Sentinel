@@ -32,6 +32,7 @@ public class LogSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
     public void entry(Context context, ResourceWrapper resourceWrapper, DefaultNode obj, int count, boolean prioritized, Object... args)
         throws Throwable {
         try {
+            //将被设置的规则 block 的信息记录到日志文件 sentinel-block.log 中
             fireEntry(context, resourceWrapper, obj, count, prioritized, args);
         } catch (BlockException e) {
             EagleEyeLogUtil.log(resourceWrapper.getName(), e.getClass().getSimpleName(), e.getRuleLimitApp(),

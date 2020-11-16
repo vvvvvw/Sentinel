@@ -49,12 +49,17 @@ public class DefaultController implements TrafficShapingController {
     public boolean canPass(Node node, int acquireCount, boolean prioritized) {
         int curCount = avgUsedTokens(node);
         if (curCount + acquireCount > count) {
+            // 只有设置了 prioritized 的情况才会进入到下面的 if 分支
+            // 也就是说，对于一般的场景，被限流了，就快速失败
             if (prioritized && grade == RuleConstant.FLOW_GRADE_QPS) {
                 long currentTime;
                 long waitInMs;
                 currentTime = TimeUtil.currentTimeMillis();
                 waitInMs = node.tryOccupyNext(currentTime, acquireCount, count);
+                // 下面的这行 tryOccupyNext 非常复杂，大意就是说去占有"未来的"令牌
+                // 可以看到，下面做了 sleep，为了保证 QPS 不会因为预占而撑大
                 if (waitInMs < OccupyTimeoutProperty.getOccupyTimeout()) {
+                    // 就是这里设置了 borrowArray 的值
                     node.addWaitingRequest(currentTime + waitInMs, acquireCount);
                     node.addOccupiedPass(acquireCount);
                     sleep(waitInMs);

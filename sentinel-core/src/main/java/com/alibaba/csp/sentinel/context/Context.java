@@ -54,6 +54,7 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
  * @see ContextUtil
  * @see NodeSelectorSlot
  */
+//调用链的入口，Context 实例设置在 ThreadLocal
 public class Context {
 
     /**

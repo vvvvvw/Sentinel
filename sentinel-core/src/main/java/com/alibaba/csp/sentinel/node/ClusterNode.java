@@ -40,6 +40,7 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
  * @author qinan.qn
  * @author jialiang.linjl
  */
+//数据统计的node
 public class ClusterNode extends StatisticNode {
 
     /**
@@ -50,6 +51,7 @@ public class ClusterNode extends StatisticNode {
      * at the very beginning while concurrent map will hold the lock all the time.
      * </p>
      */
+    //key：origin value：StatisticNode（每个origin都是不同的StatisticNode）
     private Map<String, StatisticNode> originCountMap = new HashMap<String, StatisticNode>();
 
     private final ReentrantLock lock = new ReentrantLock();

@@ -27,21 +27,24 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.Metric;
 
 /**
  * <p>The statistic node keep three kinds of real-time statistics metrics:</p>
- * <ol>
- * <li>metrics in second level ({@code rollingCounterInSecond})</li>
- * <li>metrics in minute level ({@code rollingCounterInMinute})</li>
- * <li>thread count</li>
+ * <ol> 数据节点持有三种实时统计数据
+ * <li>metrics in second level ({@code rollingCounterInSecond})</li> 秒钟级别的统计指标
+ * <li>metrics in minute level ({@code rollingCounterInMinute})</li> 分钟级别的统计指标
+ * <li>thread count</li> 线程数量
  * </ol>
  *
  * <p>
  * Sentinel use sliding window to record and count the resource statistics in real-time.
  * The sliding window infrastructure behind the {@link ArrayMetric} is {@code LeapArray}.
  * </p>
- *
+ * Sentinel使用滑动窗口记录和统计实时信息。
+ * ArrayMetric的基础是滑动窗口实现类LeapArray
  * <p>
  * case 1: When the first request comes in, Sentinel will create a new window bucket of
  * a specified time-span to store running statics, such as total response time(rt),
  * incoming request(QPS), block request(bq), etc. And the time-span is defined by sample count.
+ * case1：收到第一个请求时，Sentinel将创建一个新的指定时间范围的bucket来存储运行数据，例如响应时间（rt），请求QPS
+ * ，请求拒绝qps（bq）等。时间跨度由bucket数量决定
  * </p>
  * <pre>
  * 	0      100ms
@@ -54,8 +57,10 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.Metric;
  * Sentinel use the statics of the valid buckets to decide whether this request can be passed.
  * For example, if a rule defines that only 100 requests can be passed,
  * it will sum all qps in valid buckets, and compare it to the threshold defined in rule.
+ * Sentinel使用有效存储桶的静态参数来确定是否可以让此请求通过。
+ * 例如，如果一条规则定义只能传递100个请求，它将对所有有效桶中的qps求和，并将其与规则中定义的阈值进行比较。
  * </p>
- *
+ * case2：连续请求
  * <p>case 2: continuous requests</p>
  * <pre>
  *  0    100ms    200ms    300ms
@@ -64,7 +69,7 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.Metric;
  *                      |
  *                   request
  * </pre>
- *
+ *  请求持续经过，并且以前的bucket过期失效
  * <p>case 3: requests keeps coming, and previous buckets become invalid</p>
  * <pre>
  *  0    100ms    200ms	  800ms	   900ms  1000ms    1300ms
@@ -73,7 +78,7 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.Metric;
  *                                                      |
  *                                                    request
  * </pre>
- *
+ * 滑动窗口变为如下
  * <p>The sliding window should become:</p>
  * <pre>
  * 300ms     800ms  900ms  1000ms  1300ms
@@ -86,23 +91,28 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.Metric;
  * @author qinan.qn
  * @author jialiang.linjl
  */
+//数据统计
 public class StatisticNode implements Node {
 
     /**
      * Holds statistics of the recent {@code INTERVAL} seconds. The {@code INTERVAL} is divided into time spans
      * by given {@code sampleCount}.
+     * 最近1秒的qps统计数据，1s，2个bucket
      */
     private transient volatile Metric rollingCounterInSecond = new ArrayMetric(SampleCountProperty.SAMPLE_COUNT,
-        IntervalProperty.INTERVAL);
+        IntervalProperty.INTERVAL); //秒级别的
 
     /**
      * Holds statistics of the recent 60 seconds. The windowLengthInMs is deliberately set to 1000 milliseconds,
      * meaning each bucket per second, in this way we can get accurate statistics of each second.
+     * 最近60秒的qps统计数据，60s，60个bucket。拆分成60个bucket的原因是因为 这个的话我们统计每个bucekt 就能知道该秒的qps
+     * 分钟维度的设置，sampleCount 为 60，intervalInMs 为 60 * 1000
      */
     private transient Metric rollingCounterInMinute = new ArrayMetric(60, 60 * 1000, false);
 
     /**
      * The counter for thread count.
+     * 线程数量统计，统计当前并发量
      */
     private AtomicInteger curThreadNum = new AtomicInteger(0);
 
@@ -181,6 +191,7 @@ public class StatisticNode implements Node {
         return rollingCounterInMinute.success();
     }
 
+    //异常qps
     @Override
     public double exceptionQps() {
         return rollingCounterInSecond.exception() / rollingCounterInSecond.getWindowIntervalInSec();

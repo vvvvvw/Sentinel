@@ -286,32 +286,36 @@ public class SystemRuleManager {
      */
     public static void checkSystem(ResourceWrapper resourceWrapper) throws BlockException {
         // Ensure the checking switch is on.
-        if (!checkSystemStatus.get()) {
+        if (!checkSystemStatus.get()) { //开关是否开启
             return;
         }
 
         // for inbound traffic only
-        if (resourceWrapper.getType() != EntryType.IN) {
+        if (resourceWrapper.getType() != EntryType.IN) { //如果不是 in流量，直接返回
             return;
         }
 
         // total qps
         double currentQps = Constants.ENTRY_NODE == null ? 0.0 : Constants.ENTRY_NODE.successQps();
+        //如果qps 大于 阈值，则阻塞
         if (currentQps > qps) {
             throw new SystemBlockException(resourceWrapper.getName(), "qps");
         }
 
+        //如果全局 执行的线程数（数据统计：调用enter的时候线程数+1，调用exit的时候线程数-1）超过阈值，阻塞
         // total thread
         int currentThread = Constants.ENTRY_NODE == null ? 0 : Constants.ENTRY_NODE.curThreadNum();
         if (currentThread > maxThread) {
             throw new SystemBlockException(resourceWrapper.getName(), "thread");
         }
 
+        //如果全局响应时间 大于阈值，则阻塞
         double rt = Constants.ENTRY_NODE == null ? 0 : Constants.ENTRY_NODE.avgRt();
         if (rt > maxRt) {
             throw new SystemBlockException(resourceWrapper.getName(), "rt");
         }
 
+        //如果当前系统负载大于阈值，则阻塞（bbr算法）
         // load. BBR algorithm.
         if (highestSystemLoadIsSet && getCurrentSystemAvgLoad() > highestSystemLoad) {
             if (!checkBbr(currentThread)) {
@@ -319,6 +323,7 @@ public class SystemRuleManager {
             }
         }
 
+        //如果当前cpu使用率大于阈值，则阻塞（bbr算法）
         // cpu usage
         if (highestCpuUsageIsSet && getCurrentCpuUsage() > highestCpuUsage) {
             if (!checkBbr(currentThread)) {

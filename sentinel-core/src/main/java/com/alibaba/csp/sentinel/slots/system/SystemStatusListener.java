@@ -26,6 +26,7 @@ import com.sun.management.OperatingSystemMXBean;
 /**
  * @author jialiang.linjl
  */
+//定时job，每秒执行一次
 public class SystemStatusListener implements Runnable {
 
     volatile double currentLoad = -1;
